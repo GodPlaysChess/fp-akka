@@ -12,11 +12,22 @@ object io_example extends App {
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   import cats.effect.IO
 
-  val f1 = IO { Thread.sleep(1000); 1 }
+  List(1).length
 
-  measure(f1.unsafeRunSync())
-  measure(f1.unsafeRunSync())
-  // not possible https://github.com/typelevel/cats-effect/issues/120
+  // fibers fork join race.
+//  val f1 = IO { Thread.sleep(500); 1 }
+//  val f2 = IO { Thread.sleep(500); println("computing something"); 1 }
+//
+//  val program = for {
+//    r1     <- f1
+//    fiber1 <- f1.start // running this stuff in parallel to it, getting fiber to control resources.
+//    fiber2 <- f2.forever.fork // running this stuff in parallel to it, getting fiber to control resources.
+//    r2     <- fiber1.join
+//    _      <- fiber2.interrupt
+//  } yield r2 + r1
+
+//  measure(f1.unsafeRunSync())
+//  measure(f1.unsafeRunSync())
 
 }
 

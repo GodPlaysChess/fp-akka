@@ -2,10 +2,11 @@ package iozio.control
 
 import java.util.concurrent.Executors
 
+import cats.effect.ContextShift
 import iozio.measure.measure
 import zio.DefaultRuntime
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 object io_example extends App {
   /*
@@ -14,7 +15,6 @@ object io_example extends App {
   // https://blog.softwaremill.com/thread-shifting-in-cats-effect-and-zio-9c184708067b
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   import cats.effect.IO
-  import cats.effect.IOApp._
   import cats.implicits._
 
   // timeouts, races, brackets  + typeclasses
@@ -24,27 +24,27 @@ object io_example extends App {
   val f2 = IO { Thread.sleep(500); println("computing something"); 1 }
   // one should operate on result
   // since everything is effect, then
+  implicit val contextShift: ContextShift[IO] = IO.contextShift(ec)
 
   // forks heavily uses context shifts - which is a little bit dangerous.
-//  val program = for {
-//    r1 <- f1
-//    fiber1    <- f1.start
-//    fiber2    <- f2.never.start
-//    r2 <- fiber1.join
-//    r3 <- fiber2.interrupt
-//  } yield r2 + r1
+  val program = for {
+    r1 <- f1
+    fiber1    <- f1.start
+    fiber2    <- IO.never.start
+    r2 <- fiber1.join
+    r3 <- fiber2.cancel
+  } yield r2 + r1
+
+//  measure(program.unsafeRunSync())
 
   // eagerness - inconsistency typeclasses (Monad - Applicative)
   def neverA: IO[Unit] = IO { println("forever") } *> neverA
   def neverM: IO[Unit] = IO { println("forever") } >> neverM
 
   measure(neverA.unsafeRunSync())
-  // not possible https://github.com/typelevel/cats-effect/issues/120
-
 }
 
 object future_example extends App {
-  import scala.concurrent.duration._
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
 
   // control is tied to execution context. :(

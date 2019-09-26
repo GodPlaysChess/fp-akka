@@ -7,7 +7,7 @@ object LambdaExpansions extends App {
   x(1)
   x(1)
 
-  val y: Int => Int = TryThis("undescore notation").ok(_)
+  val y: Int => Int = i => TryThis("undescore notation").ok(i)
 
   y(1)
   y(1)
