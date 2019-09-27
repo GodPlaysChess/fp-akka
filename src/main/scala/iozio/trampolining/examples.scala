@@ -3,8 +3,8 @@ package iozio.trampolining
 import java.util.concurrent.Executors
 
 import iozio.measure.measure
-import iozio.trampolining.zio_example.{f1, unsafeRun}
-import zio.{DefaultRuntime, IO}
+import iozio.trampolining.zio_example.unsafeRun
+import zio.DefaultRuntime
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -37,11 +37,16 @@ object future_example_recursion extends App {
   measure(Await.result(blowUp(10000), Duration.Inf))
 }
 
+
 object zio_example extends App with DefaultRuntime {
   import zio._
 
   val f1 = (1 to 1000000).foldLeft(IO.succeed(0))((a, _) => a.map(_ + 1))
   measure(unsafeRun(f1))
+
+  // using Arrows it's even faster, bu subject for another talk
+//  val f2: FunctionIO[Nothing, Int, Int] = (1 to 1000).foldLeft(FunctionIO.identity[Int])((a, _) => a.map(_ + 1))
+//  measure(unsafeRun(f2.run(0)))
 }
 
 object zio_example_recursion extends App {
@@ -53,3 +58,35 @@ object zio_example_recursion extends App {
 
   measure(unsafeRun(blowUp(10000)))
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object Matthias  extends App {
+  trait Foo { def get[A]: List[A] }
+  def foo = new Foo { override def get[A]: List[A] = List.empty[A] }
+  def first(list: Foo): Int = { list.get[Int].size }
+  measure(first(foo))
+
+  trait Foo1[A] { def get: List[A] }
+  def foo1[A] = new Foo1[A] { override def get: List[A] = List.empty[A] }
+  def first1(list: Foo1[A forSome {type A}]): Int = { list.get.size } // no type on `get` here
+  measure(first1(foo1))
+ }

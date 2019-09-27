@@ -4,9 +4,10 @@ import java.util.concurrent.Executors
 
 import cats.data.EitherT
 import iozio.measure.measure
+import scalaz.MonadError
 import zio.DefaultRuntime
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 object io_example extends App {
 
@@ -14,7 +15,7 @@ object io_example extends App {
   import cats.effect.IO
 
   def f1 = IO { throw new RuntimeException("Database error"); 1 }
-  def f2 = IO {  1 }
+  def f2 = IO { 1 }
 
   // can only bimap since it's not parametric over `E`
   measure(f1.handleErrorWith(_ => f1).unsafeRunSync())

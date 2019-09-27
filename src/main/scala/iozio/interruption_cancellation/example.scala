@@ -45,7 +45,7 @@ object zio_example extends App with DefaultRuntime {
   // one should operate on result
   // since everything is effect, then
   val program = for {
-    r1     <- f1
+    r1     <- f1  // 500ms 1
     fiber1 <- f1.fork // running this stuff in parallel to it, getting fiber to control resources.
     fiber2 <- f2.forever.fork // running this stuff in parallel to it, getting fiber to control resources.
     r2     <- fiber1.join

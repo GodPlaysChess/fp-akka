@@ -41,7 +41,7 @@ object io_example extends App {
   def neverA: IO[Unit] = IO { println("forever") } *> neverA
   def neverM: IO[Unit] = IO { println("forever") } >> neverM
 
-  measure(neverA.unsafeRunSync())
+  measure(neverM.unsafeRunSync())
 }
 
 object future_example extends App {
